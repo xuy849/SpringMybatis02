@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spingmybatis02.mapper.UserMapper">
+
+	<!--第一大题 -->
+	<!-- 根据(first_name,last_name)模糊查找用户信息 -->
+	<select id="findUserByName" parameterType="userCustom" resultType="userCustom">
+		select * from user where first_name like '%${first_name}%' and last_name like '%${last_name}%'
+	</select>
+	
+	<!-- 根据(first_name,last_name)删除指定user -->
+	<delete id="deleteUserByName" parameterType="userCustom">	
+		delete user.* from user where first_name=#{first_name} and last_name=#{last_name}
+	</delete>
+	
+	<!--根据(first_name,last_name)删除指定的user_info  -->
+	<delete id = "deleteUserInfoByName" parameterType="userCustom">
+	   delete user_info.* from user,user_info where user.id = user_info.user_id and user.first_name = #{first_name} and user.last_name=#{last_name}
+	</delete>
+	
+	<!-- 根据id删除user -->
+	<delete id="deleteUserById" parameterType="int">
+		delete user.* from user where id=#{id}
+	</delete>
+	
+	<!-- 根据id删除user_info -->
+	<delete id="deleteUserInfoById" parameterType="int">
+		delete user_info from user_info where user_id=#{user_id}
+	</delete>
+	
+	<!-- 插入user并返回成功插入的用户数据
+		主键自增
+	 -->
+	<insert id="insertUser" parameterType="userCustom">
+		
+		INSERT INTO `user`(first_name,last_name,last_updated_time)
+		VALUE(#{first_name},#{last_name},#{last_updated_time})
+		
+		<selectKey resultType="int" keyProperty="id" order="AFTER">  
+             SELECT LAST_INSERT_ID() AS id
+        </selectKey>  	
+	</insert>
+	
+	<!-- 根据(first_name,last_name)修改user_info -->
+	<update id="updateUserInfoByName" parameterType="userCustom02">
+		UPDATE `user_info`
+		SET tel=#{userInfo.tel} , address=#{userInfo.address}
+		WHERE EXISTS(
+			SELECT 1
+    		FROM `user`
+    		WHERE user.first_name =#{user.first_name} and user.last_name=#{user.last_name} and user.id = user_info.user_id
+		)
+	</update>
+	
+	<!-- 根据id更新user_info -->
+	<update id="updateUserInfoByUserId" parameterType="userInfo">
+		UPDATE `user_info`
+		SET tel = #{tel} ,address=#{address}
+		WHERE user_id = #{user_id};
+	</update>
+	
+	<!-- 往user_info中添加空的记录 -->
+	<insert id="insertEmptyUserInfo" parameterType="int">
+		insert into user_info(user_id) value(#{id})		
+	</insert>
+	
+</mapper>
